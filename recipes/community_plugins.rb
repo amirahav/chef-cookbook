@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 #
 # Cookbook Name:: rabbitmq
 # Recipe:: community_plugins
@@ -25,9 +26,6 @@ node['rabbitmq']['community_plugins'].each do |plugin, download_url|
   # This will only work for deb/rpm installations, such as Ubuntu, Fedora and CentOS
   # List of installation directory per installation method: https://www.rabbitmq.com/installing-plugins.html
   remote_file "/usr/lib/rabbitmq/lib/rabbitmq_server-#{node['rabbitmq']['version']}/plugins/#{plugin}.ez" do
-    mode '0644'
-    owner 'root'
-    group 'root'
     source download_url
   end
 

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # Cookbook Name:: rabbitmq
 # Provider:: parameter
@@ -26,8 +27,8 @@ use_inline_resources
 
 def parameter_exists?(vhost, name)
   cmd = 'rabbitmqctl list_parameters'
-  cmd << " -p #{Shellwords.escape vhost}" unless vhost.nil?
-  cmd << " |grep '#{name}\\b'"
+  cmd += " -p #{Shellwords.escape vhost}" unless vhost.nil?
+  cmd += " |grep '#{name}\\b'"
 
   cmd = Mixlib::ShellOut.new(cmd, :env => shell_environment)
   cmd.run_command
@@ -42,13 +43,13 @@ end
 action :set do
   unless parameter_exists?(new_resource.vhost, new_resource.parameter)
     cmd = 'rabbitmqctl set_parameter'
-    cmd << " -p #{new_resource.vhost}" unless new_resource.vhost.nil?
-    cmd << " #{new_resource.component}"
-    cmd << " #{new_resource.parameter}"
+    cmd += " -p #{new_resource.vhost}" unless new_resource.vhost.nil?
+    cmd += " #{new_resource.component}"
+    cmd += " #{new_resource.parameter}"
 
-    cmd << " '"
-    cmd << JSON.dump(new_resource.params)
-    cmd << "'"
+    cmd += " '"
+    cmd += JSON.dump(new_resource.params)
+    cmd += "'"
 
     parameter = "#{new_resource.component} #{new_resource.parameter}"
 

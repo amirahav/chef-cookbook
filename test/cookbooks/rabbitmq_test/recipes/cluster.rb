@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # Cookbook Name:: rabbitmq_test
 # Recipe:: cluster
@@ -17,5 +18,5 @@
 # limitations under the License.
 #
 
-node.set['rabbitmq']['cluster'] = true
+node.normal['rabbitmq']['cluster'] = true
 include_recipe 'rabbitmq::default'

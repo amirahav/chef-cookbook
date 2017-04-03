@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 #
 # Cookbook Name:: rabbitmq
 # Recipe:: policy_management
@@ -27,6 +28,7 @@ node['rabbitmq']['policies'].each do |name, policy|
     params policy['params']
     priority policy['priority']
     vhost policy['vhost']
+    apply_to policy['apply_to']
     action :set
     notifies :restart, "service[#{node['rabbitmq']['service_name']}]"
   end

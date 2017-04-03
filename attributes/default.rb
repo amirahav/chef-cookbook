@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 # Latest RabbitMQ.com version to install
-default['rabbitmq']['version'] = '3.6.6'
+default['rabbitmq']['version'] = '3.6.9'
 # The distro versions may be more stable and have back-ported patches
 default['rabbitmq']['use_distro_version'] = false
 # Allow the distro version to be optionally pinned like the rabbitmq.com version
@@ -9,7 +10,17 @@ default['rabbitmq']['pin_distro_version'] = false
 default['rabbitmq']['deb_package'] = "rabbitmq-server_#{node['rabbitmq']['version']}-1_all.deb"
 default['rabbitmq']['deb_package_url'] = "https://www.rabbitmq.com/releases/rabbitmq-server/v#{node['rabbitmq']['version']}/"
 
-default['rabbitmq']['rpm_package'] = "rabbitmq-server-#{node['rabbitmq']['version']}-1.noarch.rpm"
+case node['platform_family']
+when 'rhel', 'fedora'
+  default['rabbitmq']['rpm_package'] = if node['platform_version'].to_i > 6
+                                         "rabbitmq-server-#{node['rabbitmq']['version']}-1.el7.noarch.rpm"
+                                       else
+                                         "rabbitmq-server-#{node['rabbitmq']['version']}-1.el6.noarch.rpm"
+                                       end
+when 'suse'
+  default['rabbitmq']['rpm_package'] = "rabbitmq-server-#{node['rabbitmq']['version']}-1.suse.noarch.rpm"
+end
+
 default['rabbitmq']['rpm_package_url'] = "https://www.rabbitmq.com/releases/rabbitmq-server/v#{node['rabbitmq']['version']}/"
 
 default['rabbitmq']['esl-erlang_package'] = 'esl-erlang-compat-R16B03-1.noarch.rpm?raw=true'
@@ -104,6 +115,9 @@ default['rabbitmq']['ssl_ciphers'] = nil
 default['rabbitmq']['web_console_ssl'] = false
 default['rabbitmq']['web_console_ssl_port'] = 15_671
 
+# Change non SSL web console listen port
+default['rabbitmq']['web_console_port'] = 15672
+
 # tcp listen options
 default['rabbitmq']['tcp_listen'] = true
 default['rabbitmq']['tcp_listen_packet'] = 'raw'
@@ -144,11 +158,11 @@ when 'debian'
 end
 
 # heartbeat
-default['rabbitmq']['heartbeat'] = 580
+default['rabbitmq']['heartbeat'] = 60
 
 # per default all policies and disabled policies are empty but need to be
 # defined
-default['rabbitmq']['policies'] = []
+default['rabbitmq']['policies'] = {}
 default['rabbitmq']['disabled_policies'] = []
 
 # Example HA policies
