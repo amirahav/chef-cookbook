@@ -49,6 +49,11 @@ when 'debian'
     allow false
   end
 
+  if node['platform_version'].to_i < 8 && !node['rabbitmq']['use_distro_version']
+    Chef::Log.warn 'Debian 7 is too old to use the recent .deb RabbitMQ packages. Falling back to distro package!'
+    node.normal['rabbitmq']['use_distro_version'] = true
+  end
+
   if node['rabbitmq']['use_distro_version']
     package 'rabbitmq-server' do
       action :install
@@ -82,6 +87,18 @@ when 'debian'
 
     file '/etc/init.d/rabbitmq-server' do
       action :delete
+    end
+
+    include_recipe 'logrotate'
+
+    logrotate_app 'rabbitmq-server' do
+      path node['rabbitmq']['logrotate']['path']
+      enable node['rabbitmq']['logrotate']['enable']
+      rotate node['rabbitmq']['logrotate']['rotate']
+      frequency node['rabbitmq']['logrotate']['frequency']
+      options node['rabbitmq']['logrotate']['options']
+      sharedscripts node['rabbitmq']['logrotate']['sharedscripts']
+      postrotate node['rabbitmq']['logrotate']['postrotate']
     end
 
     template "/etc/init/#{node['rabbitmq']['service_name']}.conf" do
@@ -228,6 +245,8 @@ if node['rabbitmq']['clustering']['enable'] && (node['rabbitmq']['erlang_cookie'
   execute 'reset-node' do
     command 'rabbitmqctl stop_app && rabbitmqctl reset && rabbitmqctl start_app'
     action :nothing
+    retries 12
+    retry_delay 5
   end
 end
 
